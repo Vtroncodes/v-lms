@@ -13,13 +13,15 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\CourseResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CourseResource\RelationManagers;
+use Closure;
+use Barryvdh\Debugbar\Facade as Debugbar;
 
 class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Courses';
+    // protected static ?string $navigationGroup = 'Courses';
 
     public static function form(Form $form): Form
     {
@@ -60,22 +62,59 @@ class CourseResource extends Resource
                 Forms\Components\TextInput::make('certificate_url')
                     ->nullable()
                     ->label('Certificate URL'),
-                // Forms\Components\TextInput::make('directory_path')
-                //     ->required()
-                //     ->label('Directory Path'),
-                Forms\Components\HasManyRepeater::make('lesson_id')
-                ->relationship('lessons') // Use HasManyRepeater for managing lessons
-               
+
+                Forms\Components\Select::make('lessons')
+                    ->label('Lessons')
+                    ->relationship('lessons', 'title') // Use the relationship and the title column from Lesson
+                    ->multiple() // Allow selecting multiple lessons
+                    ->preload()
+                    ->afterStateUpdated(function (\Filament\Forms\Set $set, $state) {
+                        // Update a temporary array to reflect selected lessons
+                        $set('selected_lessons', $state);
+                        Debugbar::enable();
+                        Debugbar::info($state);
+                    }),
+                
+                Forms\Components\Repeater::make('lesson_orders')
+                    ->label('Lessons with Order')
                     ->schema([
-                        Forms\Components\Select::make('lesson_id')
-                            ->relationship('lesson', 'title') // Assuming you have a relationship defined in the Course model
-                            ->required()
-                            ->label('Select Lesson'),
+                        Forms\Components\TextInput::make('lesson_title') // Display lesson title
+                            ->label('Lesson Title')
+                            ->disabled(), // Make it readonly
+                        Forms\Components\TextInput::make('order') // Input for specifying order
+                            ->label('Order')
+                            ->numeric()
+                            ->required(),
                     ])
-                    ->createItemButtonLabel('Add Lesson'),
-                // Other fields...
+                    ->columns(2) // Display inputs in two columns
+                    ->reactive() // React to changes in the state
+                    ->hidden(fn (\Filament\Forms\Get $get) => empty($get('selected_lessons'))) // Hide if no lessons are selected
+                    ->afterStateHydrated(function (\Filament\Forms\Set $set, \Filament\Forms\Get $get) {
+                        $selectedLessons = $get('selected_lessons');
+                        if (!empty($selectedLessons)) {
+                            $lessonDetails = Lesson::whereIn('id', $selectedLessons)->get(['id', 'title']);
+                            $orders = $lessonDetails->map(fn ($lesson) => [
+                                'lesson_title' => $lesson->title,
+                                'lesson_id' => $lesson->id,
+                                'order' => null, // Placeholder for order
+                            ])->toArray();
+                            $set('lesson_orders', $orders);
+                        }
+                    }),
+
 
             ]);
+    }
+    public static function saving(Course $course, array $data)
+    {
+        if (isset($data['lesson_orders'])) {
+            $lessonOrders = collect($data['lesson_orders'])->mapWithKeys(function ($item) {
+                return [$item['lesson_id'] => ['order' => $item['order']]];
+            });
+
+            // Sync lessons with order to the pivot table
+            $course->lessons()->sync($lessonOrders);
+        }
     }
 
     public static function table(Table $table): Table
@@ -86,6 +125,10 @@ class CourseResource extends Resource
                 Tables\Columns\TextColumn::make('duration')->sortable(),
                 Tables\Columns\TextColumn::make('level')->sortable(),
                 Tables\Columns\TextColumn::make('course_type')->sortable(),
+                Tables\Columns\TextColumn::make('lessons')->label('Lessons')->getStateUsing(fn($record) => $record->lessons
+                    ->map(fn($lesson) => "{$lesson->title} (Order: {$lesson->pivot->order})")
+                    ->join(', '))
+                    ->sortable(),
             ])
             ->filters([
                 //

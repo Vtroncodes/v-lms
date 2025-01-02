@@ -21,16 +21,21 @@ class Lesson extends Model
         'content'
     ];
 
-   
+
+    // public function courses()
+    // {
+    //     return $this->belongsToMany(Course::class, 'course_lesson')->withPivot(); // Specify pivot table name if different from default
+    // }
     public function courses()
     {
-        return $this->belongsToMany(Course::class, 'course_lesson')->withPivot(); // Specify pivot table name if different from default
+        return $this->belongsToMany(Course::class)->withTimestamps();
     }
+
     public function topics()
     {
         return $this->hasMany(Topic::class);
     }
-    
+
     public function contents()
     {
         return $this->morphMany(Content::class, 'contentable');
