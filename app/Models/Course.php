@@ -42,8 +42,8 @@ class Course extends Model
     // A course has many lessons
     public function lessons()
     {
-        return $this->hasMany(Lesson::class);
-    }
+        return $this->belongsToMany(Lesson::class, 'course_lesson', 'course_id', 'lesson_id')->withPivot('lesson_order')->withTimestamps();
+    }    
 
     public function users()
     {
@@ -59,7 +59,7 @@ class Course extends Model
     {
         return $this->morphMany(Assignment::class, 'assignmentable');
     }
-    
+
     public function quizzes()
     {
         return $this->morphMany(Quiz::class, 'quizable');

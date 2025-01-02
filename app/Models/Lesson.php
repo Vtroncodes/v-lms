@@ -21,11 +21,11 @@ class Lesson extends Model
         'content'
     ];
 
-    public function course()
+   
+    public function courses()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsToMany(Course::class, 'course_lesson')->withPivot(); // Specify pivot table name if different from default
     }
-
     public function topics()
     {
         return $this->hasMany(Topic::class);
