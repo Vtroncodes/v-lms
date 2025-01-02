@@ -45,15 +45,21 @@ class Course extends Model
         return $this->hasMany(Lesson::class);
     }
 
-    // // A course can have many enrollments
-    // public function enrollments()
-    // {
-    //     return $this->hasMany(Enrollment::class);
-    // }
+    public function contents()
+    {
+        return $this->morphMany(Content::class, 'contentable');
+    }
+    public function assignments()
+    {
+        return $this->morphMany(Assignment::class, 'assignmentable');
+    }
+    public function quizzes()
+    {
+        return $this->morphMany(Quiz::class, 'quizable');
+    }    
 
-    // // A course can have many reviews
-    // public function ratingsReviews()
-    // {
-    //     return $this->hasMany(RatingReview::class);
-    // }
+    public function ratingsReviews()
+    {
+        return $this->hasMany(RatingReview::class);
+    }
 }

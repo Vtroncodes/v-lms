@@ -5,30 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Lesson extends Model
+class Topic extends Model
 {
     use HasFactory;
 
+    // Specify the fillable fields (columns that can be mass-assigned)
+    protected $fillable = ['title', 'description', 'content_id'];
+
     /**
-     *The attributes are mass assignable 
-     * 
-     *@var array
+     * Get all content blocks associated with the topic.
      */
 
-    protected $fillable = [
-        'title',
-        'description',
-        'content'
-    ];
-
-    public function course()
+    public function lesson()
     {
-        return $this->belongsTo(Course::class);
-    }
-
-    public function topics()
-    {
-        return $this->hasMany(Topic::class);
+        return $this->belongsTo(Lesson::class);
     }
     
     public function contents()

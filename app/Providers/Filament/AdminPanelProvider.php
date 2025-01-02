@@ -23,11 +23,11 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        Debugbar::enable();
-        Debugbar::info('hi');
-        Debugbar::error('Error!');
-        Debugbar::warning('Watch out…');
-        Debugbar::addMessage('Another message', 'mylabel');
+        // Debugbar::enable();
+        // Debugbar::info('hi');
+        // Debugbar::error('Error!');
+        // Debugbar::warning('Watch out…');
+        // Debugbar::addMessage('Another message', 'mylabel');
         return $panel
             ->default()
             ->id('admin')
