@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('allowed_retakes')->nullable(); // Allowed retakes (optional)
             $table->json('required_prerequisites_course_id')->nullable(); // Prerequisites in JSON format
             $table->string('certificate_url')->nullable(); // Certificate URL (optional)
-            $table->string('directory_path'); // Directory path for the course
+            $table->string('directory_path')->nullable(); // Directory path for the course
             $table->timestamps(); // Created at and updated at timestamps
         });
     }

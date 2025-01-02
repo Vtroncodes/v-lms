@@ -45,18 +45,25 @@ class Course extends Model
         return $this->hasMany(Lesson::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
+
     public function contents()
     {
         return $this->morphMany(Content::class, 'contentable');
     }
+
     public function assignments()
     {
         return $this->morphMany(Assignment::class, 'assignmentable');
     }
+    
     public function quizzes()
     {
         return $this->morphMany(Quiz::class, 'quizable');
-    }    
+    }
 
     public function ratingsReviews()
     {

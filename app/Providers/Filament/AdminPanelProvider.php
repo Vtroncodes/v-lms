@@ -29,13 +29,17 @@ class AdminPanelProvider extends PanelProvider
         // Debugbar::warning('Watch out…');
         // Debugbar::addMessage('Another message', 'mylabel');
         return $panel
+        
             ->default()
             ->id('admin')
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'pri
+                mary' => Color::Amber,
             ])
+            ->darkMode(false)
+            ->brandName('V-lms')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
