@@ -39,17 +39,17 @@ class Course extends Model
      * Define relationships with other models.
      */
 
-    // A course has many lessons
+  
     // public function lessons()
     // {
-    //     return $this->belongsToMany(Lesson::class, 'course_lesson', 'course_id', 'lesson_id')->withPivot('lesson_order')->withTimestamps();
-    // }  
+    //     return $this->belongsToMany(Lesson::class)->withTimestamps();
+    // }
+
     public function lessons()
     {
-        return $this->belongsToMany(Lesson::class)->withTimestamps();
+        return $this->belongsToMany(Lesson::class)->withPivot('lesson_order');
     }
-
-
+    
     public function users()
     {
         return $this->belongsToMany(User::class);

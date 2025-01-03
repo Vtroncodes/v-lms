@@ -28,8 +28,9 @@ class Lesson extends Model
     // }
     public function courses()
     {
-        return $this->belongsToMany(Course::class)->withTimestamps();
+        return $this->belongsToMany(Course::class)->withPivot('lesson_order');
     }
+
 
     public function topics()
     {

@@ -70,7 +70,7 @@ class LessonResource extends Resource
                 //         }
                 //     }),
                 Forms\Components\Repeater::make('topic_orders')
-                    ->label('Topics with Order')
+                    ->label('Order of Topics')
                     ->schema([
                         Forms\Components\TextInput::make('topic_title') // Display topic title
                             ->label('Topic Title')
@@ -103,20 +103,7 @@ class LessonResource extends Resource
                     }),
 
             ]);
-    }
-
-    // public static function saving(Lesson $lesson, array $data)
-    // {
-
-    //     if (isset($data['topic_orders'])) {
-    //         $topicOrders = collect($data['topic_orders'])->mapWithKeys(function ($item) {
-    //             return [$item['topic_id'] => ['order' => $item['order']]];
-    //         });
-
-    //         // Sync lessons with order to the pivot table
-    //         $lesson->topics()->sync($topicOrders);
-    //     }
-    // }
+    }   
 
     public static function saving(Lesson $lesson, array $data)
     {
