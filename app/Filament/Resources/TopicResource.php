@@ -33,11 +33,7 @@ class TopicResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->label('Topic Description')
                     ->nullable(),
-                // Forms\Components\Select::make('lessons')
-                //     ->relationship('lessons') // Specify the belongsToMany relationship in the Topic model
-                //     ->label('Associated Lessons')
-                //     ->multiple() // Allow selecting multiple lessons
-                //     ->preload(),
+                
             ]);
     }
 

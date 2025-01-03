@@ -9,11 +9,6 @@ class Course extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'title',
         'description',
@@ -26,30 +21,15 @@ class Course extends Model
         'directory_path',
     ];
 
-    /**
-     * Cast attributes to specific data types.
-     *
-     * @var array
-     */
     protected $casts = [
         'required_prerequisites_course_id' => 'array', // JSON field
     ];
 
-    /**
-     * Define relationships with other models.
-     */
-
-  
-    // public function lessons()
-    // {
-    //     return $this->belongsToMany(Lesson::class)->withTimestamps();
-    // }
-
+   
     public function lessons()
     {
-        return $this->belongsToMany(Lesson::class)->withPivot('lesson_order');
+        return $this->belongsToMany(Lesson::class, 'course_lesson')->withPivot(['order'])->withTimestamps(); 
     }
-    
     public function users()
     {
         return $this->belongsToMany(User::class);

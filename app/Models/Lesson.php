@@ -8,35 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class Lesson extends Model
 {
     use HasFactory;
-
-    /**
-     *The attributes are mass assignable 
-     * 
-     *@var array
-     */
-
     protected $fillable = [
         'title',
         'description',
         'content'
     ];
-
-
-    // public function courses()
-    // {
-    //     return $this->belongsToMany(Course::class, 'course_lesson')->withPivot(); // Specify pivot table name if different from default
-    // }
+    
+ 
     public function courses()
     {
-        return $this->belongsToMany(Course::class)->withPivot('lesson_order');
+        return $this->belongsToMany(Course::class, 'course_lesson')->withPivot(['order'])->withTimestamps(); 
     }
-
 
     public function topics()
     {
-        return $this->belongsToMany(Topic::class, 'lesson_topic')
-            ->withPivot('topic_order')
-            ->withTimestamps();
+        return $this->belongsToMany(Topic::class, 'lesson_topic')->withPivot(['topic_order'])->withTimestamps();
     }
 
     public function contents()

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\CourseResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CourseResource\RelationManagers;
+use App\Filament\Resources\CourseResource\RelationManagers\LessonsRelationManager;
 
 class CourseResource extends Resource
 {
@@ -63,110 +64,13 @@ class CourseResource extends Resource
                     ->nullable()
                     ->label('Certificate URL'),
 
-                Forms\Components\Select::make('lessons')
-                    ->label('Lessons')
-                    ->relationship('lessons', 'title') // Relationship with 'Lessons'
-                    ->multiple() // Allow selecting multiple lessons
-                    ->preload()
-                    ->afterStateUpdated(function (\Filament\Forms\Set $set, $state) {
-                        // Update a temporary array to reflect selected lessons
-                        Debugbar::enable();
-                        Debugbar::info($state); // Print selected lessons' IDs
-                        $set('selected_lessons', $state);
-                    }),
-
-                // Forms\Components\Repeater::make('lesson_orders')
-                //     ->label('Order of Lessons')
-                //     ->schema([
-                //         Forms\Components\TextInput::make('lesson_title') // Display lesson title
-                //             ->label('Lesson Title')
-                //             ->disabled(), // Make it readonly
-                //         Forms\Components\TextInput::make('order') // Input for specifying order
-                //             ->label('Order')
-                //             ->numeric()
-                //             ->required(),
-                //     ])
-                //     ->columns(2) // Display inputs in two columns
-                //     ->reactive() // React to changes in the state
-                //     ->hidden(fn(\Filament\Forms\Get $get) => empty($get('selected_lessons'))) // Hide if no lessons are selected
-                //     ->afterStateHydrated(function (\Filament\Forms\Set $set, \Filament\Forms\Get $get) {
-                //         $selectedLessons = $get('selected_lessons');
-
-                //         Debugbar::info($selectedLessons, 'Selected Lessons'); // Log selected lesson IDs
-
-                //         if (!empty($selectedLessons)) {
-                //             // Fetch lessons based on selected IDs
-                //             $lessonDetails = Lesson::whereIn('id', $selectedLessons)->get(['id', 'title']);
-
-                //             Debugbar::info($lessonDetails, 'Fetched Lesson Details'); // Log fetched lesson details
-
-                //             $orders = $lessonDetails->map(fn($lesson) => [
-                //                 'lesson_title' => $lesson->title,
-                //                 'lesson_id' => $lesson->id,
-                //                 'order' => null,
-                //             ])->toArray();
-
-                //             // Set the 'lesson_orders' field with the selected lessons and placeholder orders
-                //             $set('lesson_orders', $orders);
-
-                //             Debugbar::info($orders, 'Lesson Orders'); // Log orders
-                //         }
-                //     }),
-                Forms\Components\Repeater::make('lesson_orders')
-                    ->label('Order of Lessons')
-                    ->schema([
-                        Forms\Components\Select::make('lesson_id')
-                            ->label('Lesson')
-                            ->options(
-                                fn(\Filament\Forms\Get $get, $record) =>
-                                $record
-                                    ? $record->lessons()->select('lessons.id', 'lessons.title')->pluck('title', 'id')
-                                    : Lesson::pluck('title', 'id')
-                            )
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(function (\Filament\Forms\Set $set, $state, $record = null) {
-                                $lesson = Lesson::find($state);
-                                $existingOrder = $record
-                                    ? $record->lessons()->where('lesson_id', $state)->first()?->pivot->lesson_order
-                                    : null;
-
-                                $set('lesson_title', $lesson?->title);
-                                $set('order', $existingOrder);
-                            }),
-                        Forms\Components\TextInput::make('lesson_title')
-                            ->label('Lesson Title')
-                            ->disabled(),
-                        Forms\Components\TextInput::make('order')
-                            ->label('Order')
-                            ->numeric()
-                            ->required(),
-                    ])
-                    ->columns(3)
-
+                // Forms\Components\Select::make('lessons')
+                //     ->label('Lessons')
+                //     ->relationship('lessons', 'title') // Relationship with 'Lessons'
+                //     ->multiple() // Allow selecting multiple lessons
+                //     ->preload(),
             ]);
     }
-
-    public static function saving(Course $course, array $data)
-{
-    if (isset($data['lesson_orders'])) {
-
-        Debugbar::addMessage($data, 'lesson_orders');
-        $lessonOrders = collect($data['lesson_orders'])
-            ->mapWithKeys(function ($item) {
-                return [
-                    $item['lesson_id'] => ['lesson_order' => $item['order']]
-                ];
-            })
-            ->filter(function ($value, $key) {
-                return !is_null($key) && !is_null($value['lesson_order']);
-            });
-
-        // Sync lessons with order to the pivot table
-        $course->lessons()->sync($lessonOrders);
-    }
-}
-
 
     public static function table(Table $table): Table
     {
@@ -197,7 +101,7 @@ class CourseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+           RelationManagers\LessonsRelationManager::class,
         ];
     }
 
