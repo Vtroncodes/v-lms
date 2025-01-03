@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\LessonResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\LessonResource\RelationManagers;
+use App\Filament\Resources\LessonResource\RelationManagers\TopicsRelationManager;
 
 class LessonResource extends Resource
 {
@@ -31,12 +32,6 @@ class LessonResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->nullable()
                     ->label('Description'),
-                Forms\Components\Select::make('topics')
-                    ->label('Topics')
-                    ->relationship('topics', 'title')
-                    ->multiple() // Allow selecting multiple lessons
-                    ->preload(),
-
             ]);
     }
 
@@ -47,13 +42,6 @@ class LessonResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('description')->limit(50),
-                Tables\Columns\TextColumn::make('topics')
-                    ->label('Topics')
-                    ->getStateUsing(fn($record) => $record->topics
-                        ? $record->topics
-                        ->map(fn($topic) => "{$topic->title} (Order: {$topic->pivot->topic_order})")
-                        ->join(', ')
-                        : 'No topics associated'),
             ])
             ->filters([
                 //
@@ -71,7 +59,7 @@ class LessonResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            TopicsRelationManager::class,
         ];
     }
 

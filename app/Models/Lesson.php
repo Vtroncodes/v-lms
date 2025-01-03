@@ -22,7 +22,7 @@ class Lesson extends Model
 
     public function topics()
     {
-        return $this->belongsToMany(Topic::class, 'lesson_topic')->withPivot(['topic_order'])->withTimestamps();
+        return $this->belongsToMany(Topic::class, 'lesson_topic')->withPivot(['order'])->withTimestamps();
     }
 
     public function contents()

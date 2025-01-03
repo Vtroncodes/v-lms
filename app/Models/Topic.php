@@ -18,7 +18,7 @@ class Topic extends Model
 
      public function lessons()
      {
-         return $this->belongsToMany(Lesson::class)->withTimestamps();
+         return $this->belongsToMany(Lesson::class, 'lesson_topic')->withPivot(['order'])->withTimestamps();
      }
      
     public function contents()

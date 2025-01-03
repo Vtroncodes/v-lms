@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id(); // Primary key
             $table->foreignId('lesson_id')->constrained()->onDelete('cascade'); // Foreign key to courses
             $table->foreignId('topic_id')->constrained()->onDelete('cascade'); // Foreign key to lessons
-            $table->integer('topic_order')->nullable(); // Lesson order in the course
+            $table->integer('order')->nullable(); // Lesson order in the course
             $table->timestamps(); // Created at and updated at timestamps
         });
     }
