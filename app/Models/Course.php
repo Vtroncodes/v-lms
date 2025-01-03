@@ -45,10 +45,10 @@ class Course extends Model
     //     return $this->belongsToMany(Lesson::class, 'course_lesson', 'course_id', 'lesson_id')->withPivot('lesson_order')->withTimestamps();
     // }  
     public function lessons()
-{
-    return $this->belongsToMany(Lesson::class)->withTimestamps();
-}
-  
+    {
+        return $this->belongsToMany(Lesson::class)->withTimestamps();
+    }
+
 
     public function users()
     {

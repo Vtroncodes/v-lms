@@ -16,11 +16,11 @@ class Topic extends Model
      * Get all content blocks associated with the topic.
      */
 
-    public function lesson()
-    {
-        return $this->belongsTo(Lesson::class);
-    }
-    
+     public function lessons()
+     {
+         return $this->belongsToMany(Lesson::class)->withTimestamps();
+     }
+     
     public function contents()
     {
         return $this->morphMany(Content::class, 'contentable');

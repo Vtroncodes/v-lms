@@ -33,7 +33,9 @@ class Lesson extends Model
 
     public function topics()
     {
-        return $this->hasMany(Topic::class);
+        return $this->belongsToMany(Topic::class, 'lesson_topic')
+            ->withPivot('topic_order')
+            ->withTimestamps();
     }
 
     public function contents()

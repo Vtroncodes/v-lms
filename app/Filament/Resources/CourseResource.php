@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Closure;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Course;
@@ -9,19 +10,18 @@ use App\Models\Lesson;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Barryvdh\Debugbar\Facade as Debugbar;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\CourseResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CourseResource\RelationManagers;
-use Closure;
-use Barryvdh\Debugbar\Facade as Debugbar;
 
 class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    // protected static ?string $navigationGroup = 'Courses';
+    protected static ?string $navigationGroup = 'Courses Management';
 
     public static function form(Form $form): Form
     {
@@ -126,7 +126,7 @@ class CourseResource extends Resource
                 Tables\Columns\TextColumn::make('level')->sortable(),
                 Tables\Columns\TextColumn::make('course_type')->sortable(),
                 Tables\Columns\TextColumn::make('lessons')->label('Lessons')->getStateUsing(fn($record) => $record->lessons
-                    ->map(fn($lesson) => "{$lesson->title} (Order: {$lesson->pivot->order})")
+                    ->map(fn($lesson) => "{$lesson->title} (Order: {$lesson->pivot->lesson_order})")
                     ->join(', '))
                     ->sortable(),
             ])
