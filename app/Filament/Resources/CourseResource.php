@@ -81,9 +81,9 @@ class CourseResource extends Resource
                 Tables\Columns\TextColumn::make('level')->sortable(),
                 Tables\Columns\TextColumn::make('course_type')->sortable(),
                 Tables\Columns\TextColumn::make('lessons')->label('Lessons')->getStateUsing(fn($record) => $record->lessons
-                    ->map(fn($lesson) => "{$lesson->title} (Order: {$lesson->pivot->lesson_order})")
-                    ->join(', '))
+                    ->map(fn($lesson) => "{$lesson->title}"))
                     ->sortable(),
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Created At')->sortable(),    
             ])
             ->filters([
                 //

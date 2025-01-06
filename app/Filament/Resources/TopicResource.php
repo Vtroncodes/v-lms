@@ -43,7 +43,7 @@ class TopicResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('title')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('description')->limit(50)->wrap()->label('Description'),
-                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Created At'),
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Created At')->sortable(),   
                 
 
             ])

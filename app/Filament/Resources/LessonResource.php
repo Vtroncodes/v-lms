@@ -42,6 +42,9 @@ class LessonResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('description')->limit(50),
+                Tables\Columns\TextColumn::make('topics')->label('Topics')->getStateUsing(fn($record) => $record->topics
+                ->map(fn($topics) => "{$topics->title}"))->sortable(),
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Created At'),
             ])
             ->filters([
                 //
