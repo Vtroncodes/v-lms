@@ -13,6 +13,10 @@ class Question extends Model
         'quiz_id',
     ];
 
+    protected $casts = [
+        'options' => 'json',
+    ];
+    
     public function quiz()
     {
         return $this->belongsTo(Quiz::class);

@@ -37,6 +37,6 @@ class Lesson extends Model
 
     public function quizzes()
     {
-        return $this->morphMany(Quiz::class, 'quizable');
+        return $this->morphToMany(Quiz::class, 'quizable', 'quizables');
     }
 }
