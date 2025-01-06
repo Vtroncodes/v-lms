@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\TopicResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\TopicResource\RelationManagers;
+use App\Filament\Resources\TopicResource\RelationManagers\QuizzesRelationManager;
 
 class TopicResource extends Resource
 {
@@ -43,8 +44,7 @@ class TopicResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('title')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('description')->limit(50)->wrap()->label('Description'),
-                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Created At')->sortable(),   
-                
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Created At')->sortable(),                  
 
             ])
             ->filters([
@@ -63,7 +63,7 @@ class TopicResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            QuizzesRelationManager::class,
         ];
     }
 

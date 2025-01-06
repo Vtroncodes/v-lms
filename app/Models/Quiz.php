@@ -11,17 +11,17 @@ class Quiz extends Model
 
     public function courses()
     {
-        return $this->morphedByMany(Course::class, 'quizable', 'quizables');
+        return $this->belongsToMany(Course::class, 'course_quiz')->withPivot(['order'])->withTimestamps();
     }
 
     public function lessons()
     {
-        return $this->morphedByMany(Lesson::class, 'quizable', 'quizables');
+        return $this->belongsToMany(Lesson::class, 'lesson_quiz')->withPivot(['order'])->withTimestamps();
     }
 
     public function topics()
     {
-        return $this->morphedByMany(Topic::class, 'quizable', 'quizables');
+        return $this->belongsToMany(Topic::class, 'topic_quiz')->withPivot(['order'])->withTimestamps();
     }
 
     public function questions()

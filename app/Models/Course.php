@@ -47,9 +47,9 @@ class Course extends Model
 
     public function quizzes()
     {
-        return $this->morphToMany(Quiz::class, 'quizable', 'quizables');
+        return $this->belongsToMany(Quiz::class, 'course_quiz')->withPivot(['order'])->withTimestamps(); 
+        
     }
-
     public function ratingsReviews()
     {
         return $this->hasMany(RatingReview::class);

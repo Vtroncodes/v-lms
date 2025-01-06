@@ -1,38 +1,33 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\QuizResource\RelationManagers;
 
-use App\Filament\Resources\QuestionResource\Pages;
-use App\Filament\Resources\QuestionResource\RelationManagers;
-use App\Models\Question;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class QuestionResource extends Resource
+class QuestionsRelationManager extends RelationManager
 {
-    protected static ?string $model = Question::class;
+    protected static string $relationship = 'questions';
 
-    protected static ?string $navigationIcon = 'heroicon-o-question-mark-circle';
-    protected static ?string $navigationLabel = 'Questions';
-    protected static ?string $navigationGroup = 'Quizzes Management';
-
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('question')
                     ->required()
                     ->label('Question')
-                    ->columnSpan(2), // Make the question field span across 2 columns
+                    ->columnSpan(2), 
+                 
                 Forms\Components\TextInput::make('question_order')
                     ->numeric()
                     ->label('Question order')
                     ->columnSpan(2),
+
                 Forms\Components\Repeater::make('options')
                     ->label('Options')
                     ->required()
@@ -75,57 +70,41 @@ class QuestionResource extends Resource
                     ->label('Correct Option')
                     ->columnSpan(1), // Correct option takes up 1 column
 
-                Forms\Components\Select::make('quiz_id')
-                    ->relationship('quiz', 'title') // Assuming your Quiz model has a title field
-                    ->required()
-                    ->label('Select Quiz')
-                    ->columnSpan(2), // Quiz select spans across 2 columns
+                    Forms\Components\Select::make('quiz_id')
+                    ->label('Quiz')
+                    ->columnSpan(1)
+                    ->default($this->record->quiz_id ?? null) // Set the current quiz_id (if available)
+                    ->hidden() // Make the field hidden
+                    ->disabled() // Optionally keep this if you want to prevent any interaction, but hidden will suffice
+                
+
+
 
             ]);
     }
 
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
+            ->recordTitleAttribute('title')
             ->columns([
                 Tables\Columns\TextColumn::make('question')->label('Question'),
-                Tables\Columns\TextColumn::make('options')->label('Options')->formatStateUsing(fn($state) => json_encode($state)),
-                Tables\Columns\TextColumn::make('correct_option')->label('Correct Option'),
-                Tables\Columns\TextColumn::make('quiz.title')->label('Quiz'), // Display associated quiz title
+                Tables\Columns\TextColumn::make('question_order')->label('Order'),
             ])
             ->filters([
                 //
             ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListQuestions::route('/'),
-            'create' => Pages\CreateQuestion::route('/create'),
-            'edit' => Pages\EditQuestion::route('/{record}/edit'),
-        ];
-    }
-
-    public static function render(): View|Factory|Application|string
-    {
-        return view('filament.resources.quiz-resource.pages.view-quiz', [
-            'questions' => $this->record->questions,
-        ]);
     }
 }

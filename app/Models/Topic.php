@@ -33,6 +33,7 @@ class Topic extends Model
 
     public function quizzes()
     {
-        return $this->morphToMany(Quiz::class, 'quizable', 'quizables');
+        return $this->belongsToMany(Quiz::class, 'topic_quiz')->withPivot(['order'])->withTimestamps(); 
+        
     }
 }

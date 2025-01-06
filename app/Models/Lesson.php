@@ -37,6 +37,7 @@ class Lesson extends Model
 
     public function quizzes()
     {
-        return $this->morphToMany(Quiz::class, 'quizable', 'quizables');
+        return $this->belongsToMany(Quiz::class, 'lesson_quiz')->withPivot(['order'])->withTimestamps(); 
+        
     }
 }

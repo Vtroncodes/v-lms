@@ -102,6 +102,7 @@ class CourseResource extends Resource
     {
         return [
            RelationManagers\LessonsRelationManager::class,
+           RelationManagers\QuizzesRelationManager::class,
         ];
     }
 

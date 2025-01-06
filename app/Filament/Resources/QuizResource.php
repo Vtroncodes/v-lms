@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\QuizResource\Pages;
-use App\Models\Quiz;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Quiz;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use App\Filament\Resources\QuizResource\Pages;
+use App\Filament\Resources\QuizResource\RelationManagers\QuestionsRelationManager;
 
 class QuizResource extends Resource
 {
@@ -96,7 +97,7 @@ class QuizResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // Define any relations if needed
+            QuestionsRelationManager::class,
         ];
     }
 

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('lesson_id')->constrained()->onDelete('cascade');
             $table->foreignId('quiz_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+            $table->integer('order')->nullable(); // Lesson order in the course
             $table->unique(['lesson_id', 'quiz_id']); // Optional
         });
     }

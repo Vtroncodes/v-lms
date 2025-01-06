@@ -12,8 +12,11 @@ use Barryvdh\Debugbar\Facade as Debugbar;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\LessonResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\RelationManagers\RelationManager;
 use App\Filament\Resources\LessonResource\RelationManagers;
 use App\Filament\Resources\LessonResource\RelationManagers\TopicsRelationManager;
+use App\Filament\Resources\LessonResource\RelationManagers\QuizzesRelationManager;
+
 
 class LessonResource extends Resource
 {
@@ -63,6 +66,7 @@ class LessonResource extends Resource
     {
         return [
             TopicsRelationManager::class,
+            QuizzesRelationManager::class,
         ];
     }
 
