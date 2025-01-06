@@ -29,10 +29,7 @@ class QuestionResource extends Resource
                     ->required()
                     ->label('Question')
                     ->columnSpan(2), // Make the question field span across 2 columns
-                Forms\Components\TextInput::make('question_order')
-                    ->numeric()
-                    ->label('Question order')
-                    ->columnSpan(2),
+                
                 Forms\Components\Repeater::make('options')
                     ->label('Options')
                     ->required()
@@ -89,8 +86,9 @@ class QuestionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('question')->label('Question'),
-                Tables\Columns\TextColumn::make('options')->label('Options')->formatStateUsing(fn($state) => json_encode($state)),
-                Tables\Columns\TextColumn::make('correct_option')->label('Correct Option'),
+                Tables\Columns\TextColumn::make('options')
+                    ->label('Options')
+                    ->formatStateUsing(fn($state) => implode(', ', array_values(json_decode($state, true)))),                   
                 Tables\Columns\TextColumn::make('quiz.title')->label('Quiz'), // Display associated quiz title
             ])
             ->filters([

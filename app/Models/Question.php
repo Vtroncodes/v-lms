@@ -11,12 +11,13 @@ class Question extends Model
         'options',
         'correct_option',
         'quiz_id',
+        'question_order'
     ];
 
     protected $casts = [
         'options' => 'json',
     ];
-    
+
     public function quiz()
     {
         return $this->belongsTo(Quiz::class);
