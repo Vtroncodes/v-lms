@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Course extends Model
 {
@@ -25,10 +27,10 @@ class Course extends Model
         'required_prerequisites_course_id' => 'array', // JSON field
     ];
 
-   
+
     public function lessons()
     {
-        return $this->belongsToMany(Lesson::class, 'course_lesson')->withPivot(['order'])->withTimestamps(); 
+        return $this->belongsToMany(Lesson::class, 'course_lesson')->withPivot(['order'])->withTimestamps();
     }
     public function users()
     {
@@ -47,11 +49,16 @@ class Course extends Model
 
     public function quizzes()
     {
-        return $this->belongsToMany(Quiz::class, 'course_quiz')->withPivot(['order'])->withTimestamps(); 
-        
+        return $this->belongsToMany(Quiz::class, 'course_quiz')->withPivot(['order'])->withTimestamps();
     }
     public function ratingsReviews()
     {
         return $this->hasMany(RatingReview::class);
     }
+
+    public function attachments()
+    {
+        return $this->morphMany(Attachment::class, 'attachmentable');
+    }
+
 }
