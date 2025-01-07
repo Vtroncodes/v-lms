@@ -14,6 +14,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Barryvdh\Debugbar\Facade as Debugbar;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
 use Illuminate\Support\Facades\Log;
 use App\Filament\Resources\CourseResource\Pages;
 use App\Filament\Resources\CourseResource\RelationManagers;
