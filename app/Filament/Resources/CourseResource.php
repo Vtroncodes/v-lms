@@ -32,81 +32,73 @@ class CourseResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make(12) // Define a grid with 12 columns
-                    ->schema([
-                        // Left column (Main form fields, taking 9 out of 12 columns)
-                        Forms\Components\Grid::make(9) 
-                            ->schema([
-                                Forms\Components\TextInput::make('title')
-                                    ->required()
-                                    ->label('Course Title'),
-                                Forms\Components\Textarea::make('description')
-                                    ->nullable()
-                                    ->label('Description'),
-                                Forms\Components\TextInput::make('duration')
-                                    ->required()
-                                    ->label('Duration (in hours)'),
-                                Forms\Components\Select::make('level')
-                                    ->required()
-                                    ->options([
-                                        'Beginner' => 'Beginner',
-                                        'Intermediate' => 'Intermediate',
-                                        'Advanced' => 'Advanced',
-                                    ])
-                                    ->label('Course Level'),
-                                Forms\Components\Select::make('course_type')
-                                    ->required()
-                                    ->options([
-                                        'live' => 'Live',
-                                        'recorded' => 'Recorded',
-                                        'hybrid' => 'Hybrid',
-                                    ])
-                                    ->label('Course Type'),
-                                Forms\Components\TextInput::make('allowed_retakes')
-                                    ->nullable()
-                                    ->label('Allowed Retakes'),
-                                Forms\Components\TextInput::make('required_prerequisites_course_id')
-                                    ->nullable()
-                                    ->label('Required Prerequisites (JSON format)'),
-                            ])
-                            ->columnSpan(9), // Main form fields take 9 out of 12 columns
-    
-                        // Right column (Upload attachments, taking 3 out of 12 columns)
-                        Forms\Components\Grid::make(3) // 3 columns for the right side (attachments)
-                            ->schema([
-                                Section::make('Upload attachments')->schema([
-                                    Forms\Components\FileUpload::make('file_attachment')
-                                        ->label('Certificate')
-                                        ->directory('uploads/course_uploads_dir')
-                                        ->disk('public')
-                                        ->acceptedFileTypes(['application/pdf', 'image/*'])
-                                        ->preserveFilenames()
-                                        ->saveUploadedFileUsing(function ($file, $state, $set, $record) {
-                                            // Just store the file and return its path
-                                            if (!$file) {
-                                                return null; // No file uploaded
-                                            } else {
-                                                $path = $file->store('uploads/course_uploads_dir', 'public');
-                                                
-                                                // Create an attachment entry
-                                                Attachment::create([
-                                                    'attachmentable_type' => Course::class,
-                                                    'attachmentable_id' => $record->id, // ID of the newly created course
-                                                    'file_url' => $path,
-                                                    'file_type' => pathinfo($path, PATHINFO_EXTENSION),
-                                                ]);
-    
-                                                return $path;
-                                            }
-                                        })
-                                        ->columnSpan(12),
-                                ]),
-                            ])
-                            ->columnSpan(3), // Attachments section takes 3 out of 12 columns
-                    ]),
-            ]);
+                Section::make('Course Details')->schema([
+                    Forms\Components\TextInput::make('title')
+                        ->required()
+                        ->label('Course Title'),
+
+                    Forms\Components\Select::make('level')
+                        ->required()
+                        ->options([
+                            'Beginner' => 'Beginner',
+                            'Intermediate' => 'Intermediate',
+                            'Advanced' => 'Advanced',
+                        ])
+                        ->label('Course Level'),
+
+
+                    Forms\Components\Select::make('course_type')
+                        ->required()
+                        ->options([
+                            'live' => 'Live',
+                            'recorded' => 'Recorded',
+                            'hybrid' => 'Hybrid',
+                        ])
+                        ->label('Course Type'),
+                    Forms\Components\TextInput::make('duration')
+                        ->required()
+                        ->label('Duration (in hours)'),
+                    Forms\Components\RichEditor::make('description')
+                        ->nullable()
+                        ->label('Description')
+                        ->columnSpan('full'),
+                    Forms\Components\TextInput::make('allowed_retakes')
+                        ->nullable()
+                        ->label('Allowed Retakes'),
+
+                    Forms\Components\TextInput::make('required_prerequisites_course_id')
+                        ->nullable()
+                        ->label('Required Prerequisites (JSON format)'),
+                ])->columnSpan(2)->columns(2),
+                // Upload attachments section
+                // Conditionally include the Upload attachments section if editing a course
+                $courseId ? Section::make('Upload attachments')->schema([
+                    Forms\Components\FileUpload::make('file_attachment')
+                        ->label('Certificate')
+                        ->directory('uploads/course_uploads_dir')
+                        ->disk('public')
+                        ->acceptedFileTypes(['application/pdf', 'image/*'])
+                        ->preserveFilenames()
+                        ->saveUploadedFileUsing(function ($file, $state, $set, $record) use ($courseId) {
+                            if (!$file) {
+                                return null; // No file uploaded
+                            } else {
+                                $path = $file->store('uploads/course_uploads_dir', 'public');
+
+                                Attachment::create([
+                                    'attachmentable_type' => Course::class,
+                                    'attachmentable_id' => $courseId, // Use the course ID here
+                                    'file_url' => $path,
+                                    'file_type' => pathinfo($path, PATHINFO_EXTENSION),
+                                ]);
+
+                                return $path;
+                            }
+                        })->columnSpan(1)->columns(2),
+                ]) : null, // Render null if not in edit mode
+            ])->columns(3);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
