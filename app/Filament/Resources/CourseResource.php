@@ -12,11 +12,13 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Spatie\MediaLibrary\HasMedia;
 use Filament\Resources\Pages\Page;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Barryvdh\Debugbar\Facade as Debugbar;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use App\Filament\Resources\CourseResource\Pages;
 use App\Filament\Resources\CourseResource\RelationManagers;
 use App\Filament\Resources\CourseResource\RelationManagers\LessonsRelationManager;
@@ -77,29 +79,66 @@ class CourseResource extends Resource
                 ])->columnSpan(2)->columns(2),
 
                 Section::make('Upload Attachments')
-                   // ->visible(fn() => request()->routeIs('filament.resources.courses.edit')) // Ensure it's visible only on edit
                     ->visible($isEdit) // Check if the current path matches the edit route
                     ->schema([
+                        Placeholder::make('Current certificate')
+                            ->content(function ($record) {
+                                if ($record) {
+                                    // Fetch the existing attachment record
+                                    $attachment = \App\Models\Attachment::where('attachmentable_type', \App\Models\Course::class)
+                                        ->where('attachmentable_id', $record->id)
+                                        ->first();
+
+                                    // Return the file's original name if found
+                                    return $attachment ? basename($attachment->file_url) : 'No file uploaded yet.';
+                                }
+
+                                return 'No file uploaded yet.'; // Default message if no record
+                            }),
                         Forms\Components\FileUpload::make('file_attachment') // Correct component for file upload
-                            ->label('Certificate')
                             ->directory('uploads/course_uploads_dir')
+                            ->disk('public')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
-                            ->preserveFilenames()
+                            ->preserveFilenames()  // Ensure the original filename is preserved
+                            ->label('Upload/Change Course Certificate')
                             ->saveUploadedFileUsing(function ($file, $state, $set, $record) {
                                 try {
-                                    $path = $file->store('uploads/course_uploads_dir', 'public');
-                
-                                    Attachment::create([
-                                        'attachmentable_type' => Course::class,
-                                        'attachmentable_id' => $record->id ?? null, // Set dynamically
-                                        'file_url' => $path,
-                                        'file_type' => pathinfo($path, PATHINFO_EXTENSION),
-                                    ]);
-                
-                                    return $path;
+                                    // Fetch the existing attachment for the course, if any
+                                    $attachment = \App\Models\Attachment::where('attachmentable_type', \App\Models\Course::class)
+                                        ->where('attachmentable_id', $record->id)
+                                        ->first();
+
+                                    // If an old attachment exists, delete it from the disk and database
+                                    if ($attachment) {
+                                        // Delete the old file from the disk
+                                        $oldFilePath = storage_path('app/public/' . $attachment->file_url);
+                                        if (file_exists($oldFilePath)) {
+                                            unlink($oldFilePath);  // Delete the old file from the directory
+                                        }
+
+                                        // Delete the old attachment record from the database
+                                        $attachment->delete();
+                                    }
+
+                                    // Store the new file using its original name
+                                    $path = $file->storeAs('uploads/course_uploads_dir', $file->getClientOriginalName(), 'public');
+
+                                    // Create or update the attachment record with the new file
+                                    \App\Models\Attachment::updateOrCreate(
+                                        [
+                                            'attachmentable_type' => \App\Models\Course::class,
+                                            'attachmentable_id' => $record->id ?? null,
+                                        ],
+                                        [
+                                            'file_url' => $path,
+                                            'file_type' => pathinfo($path, PATHINFO_EXTENSION),
+                                        ]
+                                    );
+
+                                    return $path;  // Return the new file path after saving
                                 } catch (\Exception $e) {
                                     Log::error('File upload error: ' . $e->getMessage());
-                                    return null;
+                                    return null;  // Handle errors gracefully
                                 }
                             }),
                     ])->columnSpan(1),
