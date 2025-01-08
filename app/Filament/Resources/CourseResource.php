@@ -6,20 +6,20 @@ use Closure;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Course;
-use App\Models\Attachment;
 use Filament\Forms\Form;
+use App\Models\Attachment;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Spatie\MediaLibrary\HasMedia;
-use Barryvdh\Debugbar\Facade as Debugbar;
-use Filament\Forms\Components\FileUpload;
+use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
-use Illuminate\Support\Facades\Log;
+use Barryvdh\Debugbar\Facade as Debugbar;
+use Filament\Forms\Components\FileUpload;
 use App\Filament\Resources\CourseResource\Pages;
 use App\Filament\Resources\CourseResource\RelationManagers;
 use App\Filament\Resources\CourseResource\RelationManagers\LessonsRelationManager;
-
 
 class CourseResource extends Resource
 {
@@ -30,6 +30,8 @@ class CourseResource extends Resource
 
     public static function form(Form $form): Form
     {
+        //   /  Debugbar::info($operation);
+        $isEdit = $form->getOperation() === "edit";
         return $form
             ->schema([
                 Section::make('Course Details')->schema([
@@ -46,7 +48,6 @@ class CourseResource extends Resource
                         ])
                         ->label('Course Level'),
 
-
                     Forms\Components\Select::make('course_type')
                         ->required()
                         ->options([
@@ -55,47 +56,53 @@ class CourseResource extends Resource
                             'hybrid' => 'Hybrid',
                         ])
                         ->label('Course Type'),
+
                     Forms\Components\TextInput::make('duration')
                         ->required()
                         ->label('Duration (in hours)'),
+
                     Forms\Components\RichEditor::make('description')
                         ->nullable()
                         ->label('Description')
                         ->columnSpan('full'),
+
                     Forms\Components\TextInput::make('allowed_retakes')
                         ->nullable()
                         ->label('Allowed Retakes'),
 
                     Forms\Components\TextInput::make('required_prerequisites_course_id')
                         ->nullable()
-                        ->label('Required Prerequisites (JSON format)'),
+                        ->label('Required Prerequisites (JSON format)')
+                        ->rules(['json']), // Validate JSON if required
                 ])->columnSpan(2)->columns(2),
-                // Upload attachments section
-                // Conditionally include the Upload attachments section if editing a course
-                $courseId ? Section::make('Upload attachments')->schema([
-                    Forms\Components\FileUpload::make('file_attachment')
-                        ->label('Certificate')
-                        ->directory('uploads/course_uploads_dir')
-                        ->disk('public')
-                        ->acceptedFileTypes(['application/pdf', 'image/*'])
-                        ->preserveFilenames()
-                        ->saveUploadedFileUsing(function ($file, $state, $set, $record) use ($courseId) {
-                            if (!$file) {
-                                return null; // No file uploaded
-                            } else {
-                                $path = $file->store('uploads/course_uploads_dir', 'public');
 
-                                Attachment::create([
-                                    'attachmentable_type' => Course::class,
-                                    'attachmentable_id' => $courseId, // Use the course ID here
-                                    'file_url' => $path,
-                                    'file_type' => pathinfo($path, PATHINFO_EXTENSION),
-                                ]);
-
-                                return $path;
-                            }
-                        })->columnSpan(1)->columns(2),
-                ]) : null, // Render null if not in edit mode
+                Section::make('Upload Attachments')
+                   // ->visible(fn() => request()->routeIs('filament.resources.courses.edit')) // Ensure it's visible only on edit
+                    ->visible($isEdit) // Check if the current path matches the edit route
+                    ->schema([
+                        Forms\Components\FileUpload::make('file_attachment') // Correct component for file upload
+                            ->label('Certificate')
+                            ->directory('uploads/course_uploads_dir')
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->preserveFilenames()
+                            ->saveUploadedFileUsing(function ($file, $state, $set, $record) {
+                                try {
+                                    $path = $file->store('uploads/course_uploads_dir', 'public');
+                
+                                    Attachment::create([
+                                        'attachmentable_type' => Course::class,
+                                        'attachmentable_id' => $record->id ?? null, // Set dynamically
+                                        'file_url' => $path,
+                                        'file_type' => pathinfo($path, PATHINFO_EXTENSION),
+                                    ]);
+                
+                                    return $path;
+                                } catch (\Exception $e) {
+                                    Log::error('File upload error: ' . $e->getMessage());
+                                    return null;
+                                }
+                            }),
+                    ])->columnSpan(1),
             ])->columns(3);
     }
 
